@@ -12,17 +12,29 @@ public class ParentJoint
     public List<ParentJoint> Children = new List<ParentJoint>();
 }
 
+public enum HierarchyPreset
+{
+    None,
+    Spine,
+    Hand
+}
+
 public class JointHierarchy : EditorWindow
 {
+    public HierarchyPreset Preset;
     public List<ParentJoint> Joints = new List<ParentJoint>();
+    public GameObject HandParent, SpineStart, SpineEnd;
+
+    public GameObject AnimationRefParent;
+    public DiversuitRagdoll DiversuitRagdollReference;
     public float RagdollSpring, RagdollDamper;
+    public bool HasAnimationTarget, PhysicsSimulated;
     Vector2 scrollPos;
     
     [MenuItem("Whumpus/Ragdolls/JointHierarchy", false, 1)]
     public static void ShowWindow()
     {
         GetWindow(typeof(JointHierarchy));
-
     }
 
     public void OnGUI()
@@ -32,16 +44,69 @@ public class JointHierarchy : EditorWindow
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.Space();
         EditorGUILayout.EndHorizontal();
+        EditorGUILayout.BeginHorizontal();
+        Preset = (HierarchyPreset)EditorGUILayout.EnumPopup("Hierarchy preset :", Preset);
+        EditorGUILayout.EndHorizontal();
 
-        ShowList(Joints, 0);
+        switch (Preset)
+        {
+            case HierarchyPreset.None:
+                ShowList(Joints, 0);
+                break;
+
+            case HierarchyPreset.Spine:
+                EditorGUILayout.BeginHorizontal();
+                SpineStart = (GameObject)EditorGUILayout.ObjectField("Spine start", SpineStart, typeof(GameObject), true);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                SpineEnd = (GameObject)EditorGUILayout.ObjectField("Spine end", SpineEnd, typeof(GameObject), true);
+                EditorGUILayout.EndHorizontal();
+                break;
+
+            case HierarchyPreset.Hand:
+                EditorGUILayout.BeginHorizontal();
+                HandParent = (GameObject)EditorGUILayout.ObjectField("Hand parent", HandParent, typeof(GameObject), true);
+                EditorGUILayout.EndHorizontal();
+                break;
+        }
 
         //SetValues
         EditorGUILayout.BeginHorizontal();
-        RagdollSpring = EditorGUILayout.FloatField("Ragdoll Spring", RagdollSpring);
+        EditorGUILayout.Space();
         EditorGUILayout.EndHorizontal();
+
+
         EditorGUILayout.BeginHorizontal();
-        RagdollDamper = EditorGUILayout.FloatField("Ragdoll Damper", RagdollDamper);
+        EditorGUILayout.Space();
         EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.BeginHorizontal();
+        PhysicsSimulated = EditorGUILayout.Toggle("Physics simulated", PhysicsSimulated);
+        EditorGUILayout.EndHorizontal();
+        if (PhysicsSimulated)
+        {
+            EditorGUILayout.BeginHorizontal();
+            DiversuitRagdollReference = (DiversuitRagdoll)EditorGUILayout.ObjectField("Diversuit ragdoll parent", DiversuitRagdollReference, typeof(DiversuitRagdoll), true);
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            RagdollSpring = EditorGUILayout.FloatField("Ragdoll Spring", RagdollSpring);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            RagdollDamper = EditorGUILayout.FloatField("Ragdoll Damper", RagdollDamper);
+            EditorGUILayout.EndHorizontal();
+
+        }
+
+        EditorGUILayout.BeginHorizontal();
+        HasAnimationTarget = EditorGUILayout.Toggle("Has animation target", HasAnimationTarget);
+        EditorGUILayout.EndHorizontal();
+        if (HasAnimationTarget)
+        {
+            EditorGUILayout.BeginHorizontal();
+            AnimationRefParent = (GameObject)EditorGUILayout.ObjectField("Animation ref parent", AnimationRefParent, typeof(GameObject), true);
+            EditorGUILayout.EndHorizontal();
+        }
 
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.Space();
@@ -50,7 +115,20 @@ public class JointHierarchy : EditorWindow
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Attatch"))
         {
-            Attach(Joints);
+            switch (Preset)
+            {
+                case HierarchyPreset.None:
+                    Attach(Joints);
+                    break;
+
+                case HierarchyPreset.Spine:
+                    SpineAttach(SpineStart, true);
+                    break;
+
+                case HierarchyPreset.Hand:
+                    HierarchyAttach(HandParent, true);
+                    break;
+            }
         }
         EditorGUILayout.EndHorizontal();
 
@@ -58,59 +136,442 @@ public class JointHierarchy : EditorWindow
     }
 
     private void Attach(List<ParentJoint> Joints)
-    {
+    { 
         foreach (var joint in Joints)
         {
-            joint.Go.AddComponent<Rigidbody>();
-            ConfigurableJoint jointSettings = joint.Go.AddComponent<ConfigurableJoint>();
+            Rigidbody rb = joint.Go.AddComponent<Rigidbody>();
 
-            jointSettings.xMotion = ConfigurableJointMotion.Locked;
-            jointSettings.yMotion = ConfigurableJointMotion.Locked;
-            jointSettings.zMotion = ConfigurableJointMotion.Locked;
+            if (PhysicsSimulated)
+            {
+                ConfigurableJoint jointSettings = joint.Go.AddComponent<ConfigurableJoint>();
 
-            JointDrive XDrive = new JointDrive();
-            JointDrive YZDrive = new JointDrive();
-            XDrive.positionSpring = RagdollSpring;
-            XDrive.positionDamper = RagdollDamper;
-            XDrive.maximumForce = jointSettings.xDrive.maximumForce;
-            YZDrive.positionSpring = RagdollSpring;
-            YZDrive.positionDamper = RagdollDamper;
-            YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+                jointSettings.xMotion = ConfigurableJointMotion.Locked;
+                jointSettings.yMotion = ConfigurableJointMotion.Locked;
+                jointSettings.zMotion = ConfigurableJointMotion.Locked;
 
-            jointSettings.angularXDrive = XDrive;
-            jointSettings.angularYZDrive = YZDrive;
+                JointDrive XDrive = new JointDrive();
+                JointDrive YZDrive = new JointDrive();
+                XDrive.positionSpring = RagdollSpring;
+                XDrive.positionDamper = RagdollDamper;
+                XDrive.maximumForce = jointSettings.xDrive.maximumForce;
+                YZDrive.positionSpring = RagdollSpring;
+                YZDrive.positionDamper = RagdollDamper;
+                YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
 
+                jointSettings.angularXDrive = XDrive;
+                jointSettings.angularYZDrive = YZDrive;
 
-            Attach(joint.Children, joint.Go.GetComponent<Rigidbody>());
+                Attach(joint.Children, rb);
+            }
+            else
+            {
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+                Attach(joint.Children);
+            }
+
+            if (HasAnimationTarget)
+            {
+                RagdollLimb l = joint.Go.AddComponent<RagdollLimb>();
+                l.Active = true;
+                l.TargetLimb = GetCloneOfLimb(l.gameObject).transform;
+
+                if (PhysicsSimulated)
+                {
+                    l.m_ConfigurableJoint = joint.Go.GetComponent<ConfigurableJoint>();
+                    l.Simulated = true;
+                    
+                }
+                else
+                {
+                    l.Simulated = false;
+                }
+
+                if (DiversuitRagdollReference != null)
+                    l.ragdollManager = DiversuitRagdollReference;
+            }
+
         }
     }
 
-    private void Attach(List<ParentJoint> Joints, Rigidbody rb)
+    private void Attach(List<ParentJoint> Joints, Rigidbody rigidbody)
     {
         foreach (var joint in Joints)
         {
-            joint.Go.AddComponent<Rigidbody>();
-            ConfigurableJoint jointSettings = joint.Go.AddComponent<ConfigurableJoint>();
+            Rigidbody rb = joint.Go.AddComponent<Rigidbody>();
 
-            jointSettings.connectedBody = rb;
-            jointSettings.xMotion = ConfigurableJointMotion.Locked;
-            jointSettings.yMotion = ConfigurableJointMotion.Locked;
-            jointSettings.zMotion = ConfigurableJointMotion.Locked;
+            if (PhysicsSimulated)
+            {
+                ConfigurableJoint jointSettings = joint.Go.AddComponent<ConfigurableJoint>();
 
-            JointDrive XDrive = new JointDrive();
-            JointDrive YZDrive = new JointDrive();
-            XDrive.positionSpring = RagdollSpring;
-            XDrive.positionDamper = RagdollDamper;
-            XDrive.maximumForce = jointSettings.xDrive.maximumForce;
-            YZDrive.positionSpring = RagdollSpring;
-            YZDrive.positionDamper = RagdollDamper;
-            YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+                jointSettings.connectedBody = rigidbody;
+                jointSettings.xMotion = ConfigurableJointMotion.Locked;
+                jointSettings.yMotion = ConfigurableJointMotion.Locked;
+                jointSettings.zMotion = ConfigurableJointMotion.Locked;
 
-            jointSettings.angularXDrive = XDrive;
-            jointSettings.angularYZDrive = YZDrive;
+                JointDrive XDrive = new JointDrive();
+                JointDrive YZDrive = new JointDrive();
+                XDrive.positionSpring = RagdollSpring;
+                XDrive.positionDamper = RagdollDamper;
+                XDrive.maximumForce = jointSettings.xDrive.maximumForce;
+                YZDrive.positionSpring = RagdollSpring;
+                YZDrive.positionDamper = RagdollDamper;
+                YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+
+                jointSettings.angularXDrive = XDrive;
+                jointSettings.angularYZDrive = YZDrive;
 
 
-            Attach(joint.Children, joint.Go.GetComponent<Rigidbody>());
+                Attach(joint.Children, rb);
+            }
+            else
+            {
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+                Attach(joint.Children);
+            }
+        }
+    }
+
+    private void HierarchyAttach(GameObject Parent, bool First)
+    {
+        if (First)
+        {
+            Rigidbody rb = Parent.AddComponent<Rigidbody>();
+
+            if (PhysicsSimulated)
+            {
+                ConfigurableJoint jointSettings = Parent.AddComponent<ConfigurableJoint>();
+
+                jointSettings.xMotion = ConfigurableJointMotion.Locked;
+                jointSettings.yMotion = ConfigurableJointMotion.Locked;
+                jointSettings.zMotion = ConfigurableJointMotion.Locked;
+
+                JointDrive XDrive = new JointDrive();
+                JointDrive YZDrive = new JointDrive();
+                XDrive.positionSpring = RagdollSpring;
+                XDrive.positionDamper = RagdollDamper;
+                XDrive.maximumForce = jointSettings.xDrive.maximumForce;
+                YZDrive.positionSpring = RagdollSpring;
+                YZDrive.positionDamper = RagdollDamper;
+                YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+
+                jointSettings.angularXDrive = XDrive;
+                jointSettings.angularYZDrive = YZDrive;
+            }
+            else
+            {
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+            }
+
+            if (HasAnimationTarget)
+            {
+                RagdollLimb l = Parent.AddComponent<RagdollLimb>();
+                l.Active = true;
+                l.TargetLimb = GetCloneOfLimb(l.gameObject).transform;
+
+                if (PhysicsSimulated)
+                {
+                    l.m_ConfigurableJoint = Parent.GetComponent<ConfigurableJoint>();
+                    l.Simulated = true;
+
+                }
+                else
+                {
+                    l.Simulated = false;
+                }
+
+                if (DiversuitRagdollReference != null)
+                    l.ragdollManager = DiversuitRagdollReference;
+            }
+        }
+        foreach (Transform child in Parent.transform)
+        {
+            Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+
+            if (PhysicsSimulated)
+            {
+                ConfigurableJoint jointSettings = child.gameObject.AddComponent<ConfigurableJoint>();
+
+                jointSettings.connectedBody = Parent.GetComponent<Rigidbody>();
+                jointSettings.xMotion = ConfigurableJointMotion.Locked;
+                jointSettings.yMotion = ConfigurableJointMotion.Locked;
+                jointSettings.zMotion = ConfigurableJointMotion.Locked;
+
+                JointDrive XDrive = new JointDrive();
+                JointDrive YZDrive = new JointDrive();
+                XDrive.positionSpring = RagdollSpring;
+                XDrive.positionDamper = RagdollDamper;
+                XDrive.maximumForce = jointSettings.xDrive.maximumForce;
+                YZDrive.positionSpring = RagdollSpring;
+                YZDrive.positionDamper = RagdollDamper;
+                YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+
+                jointSettings.angularXDrive = XDrive;
+                jointSettings.angularYZDrive = YZDrive;
+
+                HierarchyAttach(child.gameObject, rb);
+            }
+            else
+            {
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+                HierarchyAttach(child.gameObject, false);
+            }
+
+            if (HasAnimationTarget)
+            {
+                RagdollLimb l = child.gameObject.AddComponent<RagdollLimb>();
+                l.Active = true;
+                l.TargetLimb = GetCloneOfLimb(l.gameObject).transform;
+
+                if (PhysicsSimulated)
+                {
+                    l.m_ConfigurableJoint = child.gameObject.GetComponent<ConfigurableJoint>();
+                    l.Simulated = true;
+
+                }
+                else
+                {
+                    l.Simulated = false;
+                }
+
+                if (DiversuitRagdollReference != null)
+                    l.ragdollManager = DiversuitRagdollReference;
+            }
+
+        }
+    }
+
+
+    private void HierarchyAttach(GameObject Parent, Rigidbody rigidbody)
+    {
+        foreach (Transform child in Parent.transform)
+        {
+            Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+
+            if (PhysicsSimulated)
+            {
+                ConfigurableJoint jointSettings = child.gameObject.AddComponent<ConfigurableJoint>();
+
+
+                jointSettings.connectedBody = rigidbody;
+                jointSettings.xMotion = ConfigurableJointMotion.Locked;
+                jointSettings.yMotion = ConfigurableJointMotion.Locked;
+                jointSettings.zMotion = ConfigurableJointMotion.Locked;
+
+                JointDrive XDrive = new JointDrive();
+                JointDrive YZDrive = new JointDrive();
+                XDrive.positionSpring = RagdollSpring;
+                XDrive.positionDamper = RagdollDamper;
+                XDrive.maximumForce = jointSettings.xDrive.maximumForce;
+                YZDrive.positionSpring = RagdollSpring;
+                YZDrive.positionDamper = RagdollDamper;
+                YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+
+                jointSettings.angularXDrive = XDrive;
+                jointSettings.angularYZDrive = YZDrive;
+
+                HierarchyAttach(child.gameObject, rb);
+            }
+            else
+            {
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+                HierarchyAttach(child.gameObject, false);
+            }
+
+            if (HasAnimationTarget)
+            {
+                RagdollLimb l = child.gameObject.AddComponent<RagdollLimb>();
+                l.Active = true;
+                l.TargetLimb = GetCloneOfLimb(l.gameObject).transform;
+
+                if (PhysicsSimulated)
+                {
+                    l.m_ConfigurableJoint = child.gameObject.GetComponent<ConfigurableJoint>();
+                    l.Simulated = true;
+
+                }
+                else
+                {
+                    l.Simulated = false;
+                }
+
+                if (DiversuitRagdollReference != null)
+                    l.ragdollManager = DiversuitRagdollReference;
+            }
+
+        }
+    }
+
+    private void SpineAttach(GameObject Parent, bool First)
+    {
+        if (First)
+        {
+            Rigidbody rb = Parent.AddComponent<Rigidbody>();
+
+            if (PhysicsSimulated)
+            {
+                ConfigurableJoint jointSettings = Parent.AddComponent<ConfigurableJoint>();
+
+                jointSettings.xMotion = ConfigurableJointMotion.Locked;
+                jointSettings.yMotion = ConfigurableJointMotion.Locked;
+                jointSettings.zMotion = ConfigurableJointMotion.Locked;
+
+                JointDrive XDrive = new JointDrive();
+                JointDrive YZDrive = new JointDrive();
+                XDrive.positionSpring = RagdollSpring;
+                XDrive.positionDamper = RagdollDamper;
+                XDrive.maximumForce = jointSettings.xDrive.maximumForce;
+                YZDrive.positionSpring = RagdollSpring;
+                YZDrive.positionDamper = RagdollDamper;
+                YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+
+                jointSettings.angularXDrive = XDrive;
+                jointSettings.angularYZDrive = YZDrive;
+            }
+            else
+            {
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+            }
+
+            if (HasAnimationTarget)
+            {
+                RagdollLimb l = Parent.AddComponent<RagdollLimb>();
+                l.Active = true;
+                l.TargetLimb = GetCloneOfLimb(l.gameObject).transform;
+
+                if (PhysicsSimulated)
+                {
+                    l.m_ConfigurableJoint = Parent.GetComponent<ConfigurableJoint>();
+                    l.Simulated = true;
+
+                }
+                else
+                {
+                    l.Simulated = false;
+                }
+
+                if (DiversuitRagdollReference != null)
+                    l.ragdollManager = DiversuitRagdollReference;
+            }
+        }
+
+        foreach (Transform child in Parent.transform)
+        {
+            Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+
+            if (PhysicsSimulated)
+            {
+                ConfigurableJoint jointSettings = child.gameObject.AddComponent<ConfigurableJoint>();
+
+                jointSettings.connectedBody = Parent.GetComponent<Rigidbody>();
+                jointSettings.xMotion = ConfigurableJointMotion.Locked;
+                jointSettings.yMotion = ConfigurableJointMotion.Locked;
+                jointSettings.zMotion = ConfigurableJointMotion.Locked;
+
+                JointDrive XDrive = new JointDrive();
+                JointDrive YZDrive = new JointDrive();
+                XDrive.positionSpring = RagdollSpring;
+                XDrive.positionDamper = RagdollDamper;
+                XDrive.maximumForce = jointSettings.xDrive.maximumForce;
+                YZDrive.positionSpring = RagdollSpring;
+                YZDrive.positionDamper = RagdollDamper;
+                YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+
+                jointSettings.angularXDrive = XDrive;
+                jointSettings.angularYZDrive = YZDrive;
+
+                if (child != SpineEnd)
+                    SpineAttach(child.gameObject, rb);
+            }
+            else
+            {
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+                if (child != SpineEnd)
+                    SpineAttach(child.gameObject, false);
+            }
+
+            if (HasAnimationTarget)
+            {
+                RagdollLimb l = child.gameObject.AddComponent<RagdollLimb>();
+                l.Active = true;
+                l.TargetLimb = GetCloneOfLimb(l.gameObject).transform;
+
+                if (PhysicsSimulated)
+                {
+                    l.m_ConfigurableJoint = child.gameObject.GetComponent<ConfigurableJoint>();
+                    l.Simulated = true;
+
+                }
+                else
+                {
+                    l.Simulated = false;
+                }
+
+                if (DiversuitRagdollReference != null)
+                    l.ragdollManager = DiversuitRagdollReference;
+            }
+
+        }
+    }
+
+    private void SpineAttach(GameObject Parent, Rigidbody rigidbody)
+    {
+        foreach (Transform child in Parent.transform)
+        {
+            Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+
+            if (PhysicsSimulated)
+            {
+                ConfigurableJoint jointSettings = child.gameObject.AddComponent<ConfigurableJoint>();
+
+
+                jointSettings.connectedBody = rigidbody;
+                jointSettings.xMotion = ConfigurableJointMotion.Locked;
+                jointSettings.yMotion = ConfigurableJointMotion.Locked;
+                jointSettings.zMotion = ConfigurableJointMotion.Locked;
+
+                JointDrive XDrive = new JointDrive();
+                JointDrive YZDrive = new JointDrive();
+                XDrive.positionSpring = RagdollSpring;
+                XDrive.positionDamper = RagdollDamper;
+                XDrive.maximumForce = jointSettings.xDrive.maximumForce;
+                YZDrive.positionSpring = RagdollSpring;
+                YZDrive.positionDamper = RagdollDamper;
+                YZDrive.maximumForce = jointSettings.angularYZDrive.maximumForce;
+
+                jointSettings.angularXDrive = XDrive;
+                jointSettings.angularYZDrive = YZDrive;
+
+                if (child != SpineEnd)
+                    SpineAttach(child.gameObject, rb);
+            }
+            else
+            {
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+                if (child != SpineEnd)
+                    SpineAttach(child.gameObject, false);
+            }
+
+            if (HasAnimationTarget)
+            {
+                RagdollLimb l = child.gameObject.AddComponent<RagdollLimb>();
+                l.Active = true;
+                l.TargetLimb = GetCloneOfLimb(l.gameObject).transform;
+
+                if (PhysicsSimulated)
+                {
+                    l.m_ConfigurableJoint = child.gameObject.GetComponent<ConfigurableJoint>();
+                    l.Simulated = true;
+
+                }
+                else
+                {
+                    l.Simulated = false;
+                }
+
+                if (DiversuitRagdollReference != null)
+                    l.ragdollManager = DiversuitRagdollReference;
+            }
+
         }
     }
 
@@ -169,6 +630,31 @@ public class JointHierarchy : EditorWindow
 
         if (refLimb != null)
             limb.GetComponent<RagdollLimb>().TargetLimb = refLimb.transform;
+    }
+
+    public GameObject GetCloneOfLimb(GameObject Limb)
+    {
+        return RecursiveFindChild(AnimationRefParent.transform, Limb.name).gameObject;
+    }
+
+    public Transform RecursiveFindChild(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName)
+            {
+                return child;
+            }
+            else
+            {
+                Transform found = RecursiveFindChild(child, childName);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 }
 
