@@ -146,6 +146,11 @@ public class RagdollLimb : MonoBehaviour
                 m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Free;
                 m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Free;
             }
+
+            ConstantForce constantForce = GetComponent<ConstantForce>();
+
+            if (constantForce != null)
+                constantForce.enabled = false;
         }
     }
 
@@ -160,5 +165,10 @@ public class RagdollLimb : MonoBehaviour
             m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Locked;
             m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Locked;
         }
+
+        ConstantForce constantForce = GetComponent<ConstantForce>();
+
+        if (constantForce != null)
+            constantForce.enabled = true;
     }
 }
