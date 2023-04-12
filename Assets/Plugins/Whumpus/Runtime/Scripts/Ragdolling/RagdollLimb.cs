@@ -171,7 +171,7 @@ namespace Whumpus
                 m_ConfigurableJoint.xMotion = ConfigurableJointMotion.Locked;
                 m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Locked;
                 m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Locked;
-
+                m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;
 
                 ConstantForce parentForce = m_ConfigurableJoint.connectedBody.GetComponent<ConstantForce>();
 
