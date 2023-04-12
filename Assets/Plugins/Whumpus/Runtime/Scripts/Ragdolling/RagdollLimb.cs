@@ -147,6 +147,11 @@ namespace Whumpus
                     m_ConfigurableJoint.xMotion = ConfigurableJointMotion.Free;
                     m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Free;
                     m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Free;
+
+                    ConstantForce parentForce = m_ConfigurableJoint.connectedBody.GetComponent<ConstantForce>();
+
+                    if (parentForce != null)
+                        parentForce.enabled = false;
                 }
 
                 ConstantForce constantForce = GetComponent<ConstantForce>();
@@ -166,6 +171,12 @@ namespace Whumpus
                 m_ConfigurableJoint.xMotion = ConfigurableJointMotion.Locked;
                 m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Locked;
                 m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Locked;
+
+
+                ConstantForce parentForce = m_ConfigurableJoint.connectedBody.GetComponent<ConstantForce>();
+
+                if (parentForce != null)
+                    parentForce.enabled = true;
             }
 
             ConstantForce constantForce = GetComponent<ConstantForce>();
