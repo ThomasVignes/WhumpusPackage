@@ -1,6 +1,6 @@
 {
-    "name": "WhumpusPackage",
-    "rootNamespace": "",
+    "name": "com.whumpus.whumpuspackage",
+    "rootNamespace": "Whumpus",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
