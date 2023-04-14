@@ -238,7 +238,10 @@ namespace Whumpus.Editor
         {
             if (First)
             {
-                Rigidbody rb = Parent.AddComponent<Rigidbody>();
+                Rigidbody rb = Parent.GetComponent<Rigidbody>();
+
+                if (rb == null)
+                    Parent.AddComponent<Rigidbody>();
 
                 if (PhysicsSimulated)
                 {
