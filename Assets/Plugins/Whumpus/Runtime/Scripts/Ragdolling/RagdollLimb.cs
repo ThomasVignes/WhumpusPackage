@@ -6,17 +6,25 @@ namespace Whumpus
 {
     public class RagdollLimb : MonoBehaviour
     {
+        public LimbType Type;
+
+        [Header("Behaviour")]
         public bool Active = true;
         public bool Simulated = true;
-        public bool AdditionalDamping = true;
-        public float JointWeight, AdditionalDamper, Mass;
-        public bool LimitVelocity, LimitAngularVelocity;
-        public float MaxVelocity, MaxAngularVelocity;
-        public bool ProjectionEnabled;
         public bool CanBeCut = true;
+        public bool AdditionalDamping = true;
+        public bool ProjectionEnabled;
         public bool Monitor = false;
 
+        [Header("Values")]
+        public float JointWeight, AdditionalDamper, Mass;
+        public float MaxVelocity, MaxAngularVelocity;
+        public bool LimitVelocity, LimitAngularVelocity;
+
+        [Header("References")]
         [SerializeField] private Transform targetLimb;
+
+
         [HideInInspector]
         public DiversuitRagdoll ragdollManager;
         [HideInInspector]
@@ -32,8 +40,8 @@ namespace Whumpus
             set { targetLimb = value; }
         }
 
-
         Quaternion targetInitialRotation;
+
 
         public void Initialize()
         {
@@ -166,6 +174,35 @@ namespace Whumpus
         {
             //m_ConfigurableJoint.connectedBody = connectedRb;
             transform.parent = parent;
+            if (Simulated)
+            {
+                m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                m_ConfigurableJoint.xMotion = ConfigurableJointMotion.Locked;
+                m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Locked;
+                m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Locked;
+                m_ConfigurableJoint.targetAngularVelocity = Vector3.zero;
+                m_ConfigurableJoint.targetVelocity = Vector3.zero;
+                m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;
+
+                ConstantForce parentForce = m_ConfigurableJoint.connectedBody.GetComponent<ConstantForce>();
+
+                if (parentForce != null)
+                    parentForce.enabled = true;
+            }
+
+            ConstantForce constantForce = GetComponent<ConstantForce>();
+
+            if (constantForce != null)
+                constantForce.enabled = true;
+        }
+
+        public void Reattatch(Rigidbody targetRb)
+        {
+            //m_ConfigurableJoint.connectedBody = connectedRb;
+            m_ConfigurableJoint.connectedBody = targetRb;
+
+            transform.parent = targetRb.transform;
+
             if (Simulated)
             {
                 m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;

@@ -172,6 +172,40 @@ namespace Whumpus
             ChangeWeight(0f);
         }
 
+        public void Dismember(RagdollLimb limb)
+        {
+            limb.CutLimb();
+        }
+
+        public void Dismember(LimbType type, bool cutMultiple)
+        {
+            foreach (var l in limbs)
+            {
+                if (l.Type == type)
+                {
+                    l.CutLimb();
+
+                    if (!cutMultiple)
+                        break;
+                }
+            }
+        }
+
+        public void Dismember(LimbType type, out RagdollLimb limb)
+        {
+            limb = null;
+
+            foreach (var l in limbs)
+            {
+                if (l.Type == type)
+                {
+                    l.CutLimb();
+
+                    limb = l;
+                }
+            }
+        }
+
     }
 }
 namespace Whumpus.Editor
