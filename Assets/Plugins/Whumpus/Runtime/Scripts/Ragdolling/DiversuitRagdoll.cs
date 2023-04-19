@@ -32,6 +32,11 @@ namespace Whumpus
             set { root = value; }
         }
 
+        public List<RagdollLimb> Limbs
+        {
+            get { return limbs; }
+        }
+
         public Action Hit;
 
         private void Start()
