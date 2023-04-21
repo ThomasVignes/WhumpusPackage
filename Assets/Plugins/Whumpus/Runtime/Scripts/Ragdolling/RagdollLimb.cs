@@ -132,7 +132,7 @@ namespace Whumpus
 
         public void UpdateRb()
         {
-            if (Simulated)
+            if (Simulated && rb != null)
             {
                 rb.mass = initialMass * Mass;
             }
