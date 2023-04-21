@@ -214,6 +214,8 @@ namespace Whumpus
             m_ConfigurableJoint.connectedBody = targetRb;
 
             transform.parent = targetRb.transform;
+            transform.localPosition = localPos;
+          
 
             if (Simulated)
             {
