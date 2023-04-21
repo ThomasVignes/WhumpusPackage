@@ -42,7 +42,7 @@ namespace Whumpus
         }
 
         Quaternion targetInitialRotation;
-
+        Vector3 localPos;
 
         public void Initialize()
         {
@@ -78,6 +78,7 @@ namespace Whumpus
                     Destroy(rb);
             }
             parent = transform.parent;
+            localPos = transform.localPosition;
         }
 
         private void Update()
@@ -182,6 +183,8 @@ namespace Whumpus
                 IsCut = false;
                 
                 transform.parent = parent;
+                transform.localPosition = localPos;
+
                 if (Simulated)
                 {
                     m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;
