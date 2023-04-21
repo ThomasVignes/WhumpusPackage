@@ -114,7 +114,7 @@ namespace Whumpus
 
         public void UpdateJoint()
         {
-            if (Simulated)
+            if (Simulated && m_ConfigurableJoint != null)
             {
                 JointDrive XDrive = new JointDrive();
                 JointDrive YZDrive = new JointDrive();
