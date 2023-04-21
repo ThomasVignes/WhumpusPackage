@@ -172,11 +172,15 @@ namespace Whumpus
             {
                 limb.gameObject.layer = 0;
 
-                limb.rb.velocity = Vector3.zero;
+                
 
                 limb.CutLimb();
 
-                limb.rb.AddExplosionForce(100, mainRb.transform.position, 8);
+                if (mainRb != null)
+                {
+                    limb.rb.velocity = Vector3.zero;
+                    limb.rb.AddExplosionForce(100, mainRb.transform.position, 8);
+                }
             }
         }
 
