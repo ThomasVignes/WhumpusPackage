@@ -176,7 +176,7 @@ namespace Whumpus
 
                 limb.CutLimb();
 
-                if (mainRb != null)
+                if (mainRb != null && limb.rb != null)
                 {
                     limb.rb.velocity = Vector3.zero;
                     limb.rb.AddExplosionForce(100, mainRb.transform.position, 8);
