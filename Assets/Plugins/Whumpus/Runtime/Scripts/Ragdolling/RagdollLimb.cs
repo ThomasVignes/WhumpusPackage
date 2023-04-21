@@ -34,6 +34,7 @@ namespace Whumpus
         [HideInInspector] Transform parent;
         private float initialMass, initialXDrive, initialXDamp, initialYZDrive, initialYZDamp, maxXForce, maxYZForce;
 
+        [HideInInspector] public bool IsCut;
         public Transform TargetLimb
         {
             get { return targetLimb; }
@@ -148,6 +149,7 @@ namespace Whumpus
         {
             if (CanBeCut)
             {
+                IsCut = true;
                 //m_ConfigurableJoint.connectedBody = null;
                 transform.parent = null;
                 if (Simulated)
@@ -175,28 +177,32 @@ namespace Whumpus
         [ContextMenu("Reattach")]
         public void Reattatch()
         {
-            //m_ConfigurableJoint.connectedBody = connectedRb;
-            transform.parent = parent;
-            if (Simulated)
+            if (IsCut)
             {
-                m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;
-                m_ConfigurableJoint.xMotion = ConfigurableJointMotion.Locked;
-                m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Locked;
-                m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Locked;
-                m_ConfigurableJoint.targetAngularVelocity = Vector3.zero;
-                m_ConfigurableJoint.targetVelocity = Vector3.zero;
-                m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                IsCut = false;
+                
+                transform.parent = parent;
+                if (Simulated)
+                {
+                    m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                    m_ConfigurableJoint.xMotion = ConfigurableJointMotion.Locked;
+                    m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Locked;
+                    m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Locked;
+                    m_ConfigurableJoint.targetAngularVelocity = Vector3.zero;
+                    m_ConfigurableJoint.targetVelocity = Vector3.zero;
+                    m_ConfigurableJoint.GetComponent<Rigidbody>().velocity = Vector3.zero;
 
-                ConstantForce parentForce = m_ConfigurableJoint.connectedBody.GetComponent<ConstantForce>();
+                    ConstantForce parentForce = m_ConfigurableJoint.connectedBody.GetComponent<ConstantForce>();
 
-                if (parentForce != null)
-                    parentForce.enabled = true;
+                    if (parentForce != null)
+                        parentForce.enabled = true;
+                }
+
+                ConstantForce constantForce = GetComponent<ConstantForce>();
+
+                if (constantForce != null)
+                    constantForce.enabled = true;
             }
-
-            ConstantForce constantForce = GetComponent<ConstantForce>();
-
-            if (constantForce != null)
-                constantForce.enabled = true;
         }
 
         public void Reattatch(Rigidbody targetRb)
