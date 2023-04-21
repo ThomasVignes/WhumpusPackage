@@ -160,6 +160,26 @@ namespace Whumpus
             }
         }
 
+        public void Explode()
+        {
+            EnableForces(false);
+
+            ChangeMass(10);
+
+            ChangeWeight(0f);
+
+            foreach (var limb in limbs)
+            {
+                limb.gameObject.layer = 0;
+
+                limb.rb.velocity = Vector3.zero;
+
+                limb.CutLimb();
+
+                limb.rb.AddExplosionForce(100, mainRb.transform.position, 8);
+            }
+        }
+
         public void Die()
         {
             EnableForces(false);
