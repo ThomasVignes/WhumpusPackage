@@ -152,9 +152,12 @@ namespace Whumpus
                 transform.parent = null;
                 if (Simulated)
                 {
-                    m_ConfigurableJoint.xMotion = ConfigurableJointMotion.Free;
-                    m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Free;
-                    m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Free;
+                    if (m_ConfigurableJoint != null)
+                    {
+                        m_ConfigurableJoint.xMotion = ConfigurableJointMotion.Free;
+                        m_ConfigurableJoint.yMotion = ConfigurableJointMotion.Free;
+                        m_ConfigurableJoint.zMotion = ConfigurableJointMotion.Free;
+                    }
 
                     ConstantForce parentForce = m_ConfigurableJoint.connectedBody.GetComponent<ConstantForce>();
 
