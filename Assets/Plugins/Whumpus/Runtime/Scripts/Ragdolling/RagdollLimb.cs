@@ -41,7 +41,7 @@ namespace Whumpus
             set { targetLimb = value; }
         }
 
-        Quaternion targetInitialRotation;
+        Quaternion targetInitialRotation, localRot;
         Vector3 localPos;
 
         public void Initialize()
@@ -79,6 +79,7 @@ namespace Whumpus
             }
             parent = transform.parent;
             localPos = transform.localPosition;
+            localRot = transform.localRotation;
         }
 
         private void Update()
@@ -184,6 +185,7 @@ namespace Whumpus
                 
                 transform.parent = parent;
                 transform.localPosition = localPos;
+                transform.localRotation = localRot;
 
                 if (Simulated)
                 {
@@ -215,7 +217,7 @@ namespace Whumpus
 
             transform.parent = targetRb.transform;
             transform.localPosition = localPos;
-          
+            transform.localRotation = localRot;
 
             if (Simulated)
             {
