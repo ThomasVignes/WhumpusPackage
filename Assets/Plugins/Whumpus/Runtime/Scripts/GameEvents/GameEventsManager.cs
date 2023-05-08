@@ -173,6 +173,7 @@ namespace Whumpus
     public class MoveToTargetFeedback : GameFeedback
     {
         public float Speed, Precision;
+        public bool PointTowardsTarget;
 
         public override IEnumerator Execute(GameEvent gameEvent)
         {
@@ -181,6 +182,9 @@ namespace Whumpus
             Vector3 Dir = (TargetPos.position - gameEvent.GameObject.transform.position).normalized;
 
             gameEvent.GameObject.transform.position += Dir * Speed * Time.deltaTime;
+
+            if (PointTowardsTarget)
+                gameEvent.GameObject.transform.LookAt(TargetPos);
 
             if (Vector3.Distance(gameEvent.GameObject.transform.position, TargetPos.position) > Precision)
             {
