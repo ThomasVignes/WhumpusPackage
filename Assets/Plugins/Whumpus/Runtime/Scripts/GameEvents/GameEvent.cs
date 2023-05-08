@@ -14,6 +14,7 @@ namespace Whumpus
         public Animator Animator;
         public AudioSource AudioSource;
         public UnityEvent Delegate;
+        public Transform Target;
 
         [SerializeReference]
         public List<GameFeedback> Feedbacks = new List<GameFeedback>();

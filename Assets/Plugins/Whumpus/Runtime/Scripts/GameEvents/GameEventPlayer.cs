@@ -17,6 +17,7 @@ namespace Whumpus
         [Header("Event Settings")]
         public string EventName;
         [SerializeField] private GameObject gameobject;
+        [SerializeField] private GameObject target;
         [SerializeField] private Animator animator;
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private UnityEvent delegates;
@@ -45,7 +46,7 @@ namespace Whumpus
             yield return new WaitForSecondsRealtime(playDelay);
 
             if (!played)
-                GameEventsManager.PlayEvent(EventName, gameobject, animator, audioSource, delegates);
+                GameEventsManager.PlayEvent(EventName, gameobject, target.transform, animator, audioSource, delegates);
 
             if (PlayOnce)
                 played = true;

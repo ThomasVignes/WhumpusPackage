@@ -66,6 +66,16 @@ namespace Whumpus
             _events[eventName].Delegate = delegates;
             singleton.StartCoroutine(_events[eventName].Execute());
         }
+
+        public static void PlayEvent(string eventName, GameObject gameObject, Transform target, Animator animator, AudioSource audioSource, UnityEvent delegates)
+        {
+            _events[eventName].GameObject = gameObject;
+            _events[eventName].AudioSource = audioSource;
+            _events[eventName].Animator = animator;
+            _events[eventName].Delegate = delegates;
+            _events[eventName].Target = target;
+            singleton.StartCoroutine(_events[eventName].Execute());
+        }
         #endregion
 
     }
@@ -152,6 +162,35 @@ namespace Whumpus
         {
             gameEvent.GameObject.transform.position += Dir.normalized * Distance;
             yield break;
+        }
+
+        public override Color ReturnColor()
+        {
+            return Color.green;
+        }
+    }
+
+    public class MoveToTargetFeedback : GameFeedback
+    {
+        public float Speed, Precision;
+
+        public override IEnumerator Execute(GameEvent gameEvent)
+        {
+            Transform TargetPos = gameEvent.Target;
+
+            Vector3 Dir = (TargetPos.position - gameEvent.GameObject.transform.position).normalized;
+
+            gameEvent.GameObject.transform.position += Dir * Speed * Time.deltaTime;
+
+            if (Vector3.Distance(gameEvent.GameObject.transform.position, TargetPos.position) > Precision)
+            {
+                yield return new WaitForEndOfFrame();
+               yield return Execute(gameEvent);
+            }
+            else
+            {
+                yield break;
+            }
         }
 
         public override Color ReturnColor()
