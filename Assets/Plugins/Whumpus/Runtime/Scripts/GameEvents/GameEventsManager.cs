@@ -69,15 +69,12 @@ namespace Whumpus
 
         public static void PlayEvent(string eventName, GameObject gameObject, Transform target, Animator animator, AudioSource audioSource, UnityEvent delegates)
         {
-            _events[eventName].GameObject = gameObject;
-            _events[eventName].AudioSource = audioSource;
-            _events[eventName].Animator = animator;
-            _events[eventName].Delegate = delegates;
-            _events[eventName].Target = target;
+            if (_events[eventName] != null)
+            {
+                GameEvent Gevent = new GameEvent(eventName, gameObject, target, animator, audioSource, delegates, _events[eventName].Feedbacks);
 
-            GameEvent tempEvent = _events[eventName];
-
-            singleton.StartCoroutine(tempEvent.Execute());
+                singleton.StartCoroutine(Gevent.Execute());
+            }
         }
         #endregion
 
