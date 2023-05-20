@@ -74,7 +74,10 @@ namespace Whumpus
             _events[eventName].Animator = animator;
             _events[eventName].Delegate = delegates;
             _events[eventName].Target = target;
-            singleton.StartCoroutine(_events[eventName].Execute());
+
+            GameEvent tempEvent = _events[eventName];
+
+            singleton.StartCoroutine(tempEvent.Execute());
         }
         #endregion
 
