@@ -63,7 +63,7 @@ namespace Whumpus
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (PlayOnTriggerEnter && other.gameObject.layer == WhumpusUtilities.ToLayer(layersToHit))
+            if (PlayOnTriggerEnter && collision.gameObject.layer == WhumpusUtilities.ToLayer(layersToHit))
             {
                 PlayEvent();
             }
