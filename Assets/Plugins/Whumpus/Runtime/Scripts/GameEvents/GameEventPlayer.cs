@@ -11,6 +11,7 @@ namespace Whumpus
         public bool PlayOnce;
         [SerializeField] private float playDelay;
         public bool PlayOnStart, PlayOnTriggerEnter, PlayOnCollision;
+        [SerializeField] private LayerMask layersToHit;
         [SerializeField] private GameObject player;
 
 
@@ -54,7 +55,7 @@ namespace Whumpus
 
         private void OnTriggerEnter(Collider other)
         {
-            if (PlayOnTriggerEnter && other.gameObject == player)
+            if (PlayOnTriggerEnter && other.gameObject.layer == WhumpusUtilities.ToLayer(layersToHit))
             {
                 PlayEvent();
             }
@@ -62,7 +63,7 @@ namespace Whumpus
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (PlayOnTriggerEnter && collision.gameObject == player)
+            if (PlayOnTriggerEnter && other.gameObject.layer == WhumpusUtilities.ToLayer(layersToHit))
             {
                 PlayEvent();
             }
