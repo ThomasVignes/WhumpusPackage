@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Whumpus
 {
@@ -167,6 +168,58 @@ namespace Whumpus
         public override Color ReturnColor()
         {
             return Color.green;
+        }
+    }
+
+    public class ChangeSceneFeedback : GameFeedback
+    {
+        public enum ChangeMode
+        {
+            GoToIndex,
+            GoToScene,
+            GoNext,
+            GoPrevious
+        }
+
+        public ChangeMode Mode;
+
+        public int index;
+        public string name;
+
+
+        public override IEnumerator Execute(GameEvent gameEvent)
+        {
+            switch (Mode)
+            {
+                case ChangeMode.GoToIndex:
+                    SceneManager.LoadScene(index);
+                    break;
+                case ChangeMode.GoToScene:
+                    SceneManager.LoadScene(name);
+                    break;
+                case ChangeMode.GoNext:
+                    int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+                    if (SceneManager.sceneCount > nextSceneIndex)
+                    {
+                        SceneManager.LoadScene(nextSceneIndex);
+                    }
+                    break;
+                case ChangeMode.GoPrevious:
+                    int previousSceneIndex = SceneManager.GetActiveScene().buildIndex - 1;
+
+                    if (previousSceneIndex < 0)
+                        previousSceneIndex = 0;
+
+                    SceneManager.LoadScene(previousSceneIndex);
+
+                    break;
+            }
+            yield break;
+        }
+
+        public override Color ReturnColor()
+        {
+            return Color.white;
         }
     }
 
