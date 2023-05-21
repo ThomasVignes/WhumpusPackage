@@ -72,14 +72,30 @@ namespace Whumpus
         {
             if (_events[eventName] != null)
             {
-                GameEvent Gevent = new GameEvent(eventName, gameObject, target, animator, audioSource, delegates, _events[eventName].Feedbacks);
+                GameEvent Gevent = CreateInstance(eventName, gameObject, target, animator, audioSource, delegates, _events[eventName].Feedbacks);
 
                 singleton.StartCoroutine(Gevent.Execute());
             }
         }
         #endregion
 
+        public static GameEvent CreateInstance(string eventName, GameObject gameObject, Transform target, Animator animator, AudioSource audioSource, UnityEvent delegates, List<GameFeedback> feedbacks)
+        {
+            GameEvent o = ScriptableObject.CreateInstance<GameEvent>();
+            o.Name = eventName;
+            o.GameObject = gameObject;
+            o.Target = target;
+            o.Animator = animator;
+            o.AudioSource = audioSource;
+            o.Delegate = delegates;
+            o.Feedbacks = feedbacks;
+
+            return o;
+        }
+
     }
+
+
 
     [System.Serializable]
     public class GameFeedback

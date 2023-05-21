@@ -19,18 +19,6 @@ namespace Whumpus
         [SerializeReference]
         public List<GameFeedback> Feedbacks = new List<GameFeedback>();
 
-        public GameEvent(string name, GameObject go, Transform targ, Animator anim, AudioSource audioSource, UnityEvent deleg, List<GameFeedback> feedbacks)
-        {
-            Name = name;
-            GameObject = go;
-            Target = targ;
-            Animator = anim;
-            AudioSource = audioSource;
-            Delegate = deleg;
-            Feedbacks = feedbacks;
-
-        }
-
 
         public IEnumerator Execute()
         {
