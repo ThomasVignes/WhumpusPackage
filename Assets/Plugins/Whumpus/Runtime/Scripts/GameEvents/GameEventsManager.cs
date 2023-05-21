@@ -210,16 +210,15 @@ namespace Whumpus
                 case ChangeMode.GoToIndex:
                     SceneManager.LoadScene(index);
                     break;
+
                 case ChangeMode.GoToScene:
                     SceneManager.LoadScene(name);
                     break;
+
                 case ChangeMode.GoNext:
-                    int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
-                    if (SceneManager.sceneCount > nextSceneIndex)
-                    {
-                        SceneManager.LoadScene(nextSceneIndex);
-                    }
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
                     break;
+
                 case ChangeMode.GoPrevious:
                     int previousSceneIndex = SceneManager.GetActiveScene().buildIndex - 1;
 
