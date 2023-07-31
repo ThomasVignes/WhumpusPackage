@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Whumpus
 {
-    public class WhumpusUtilities
+    public static class WhumpusUtilities 
     {
         public static int ToLayer(int bitmask)
         {
