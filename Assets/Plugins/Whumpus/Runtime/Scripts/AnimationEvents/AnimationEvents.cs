@@ -7,6 +7,12 @@ namespace Whumpus
     public class AnimationEvents : MonoBehaviour
     {
         public List<AnimatorEvent> AnimatorEvents = new List<AnimatorEvent>();
+        private Animator animator;
+
+        private void Awake()
+        {
+            animator = GetComponent<Animator>();
+        }
 
         public void PlayEvent(string name)
         {
@@ -18,6 +24,11 @@ namespace Whumpus
                     return;
                 }
             }
+        }
+
+        public void ResetAllTriggers()
+        {
+            WhumpusUtilities.ResetAllAnimatorTriggers(animator);
         }
     }
 }
