@@ -135,6 +135,9 @@ namespace Whumpus
         {
             foreach (var limb in limbs)
             {
+                if (limb.rb == null)
+                    return;
+
                 if (resetVelocity)
                     limb.rb.velocity = Vector3.zero;
 
