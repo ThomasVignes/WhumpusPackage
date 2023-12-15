@@ -26,7 +26,8 @@ namespace Whumpus
         [SerializeField] private GameObject root;
         public Rigidbody mainRb;
 
-        public bool Simulated { get; } = true;
+        private bool m_simulated = true;
+        public bool Simulated { get { return m_simulated; } }
 
         public GameObject Root
         {
@@ -94,7 +95,7 @@ namespace Whumpus
 
         public void Simulate(bool simulate)
         {
-            Simulated = simulate;
+            m_simulated = simulate;
 
             foreach (var limb in limbs)
             {
