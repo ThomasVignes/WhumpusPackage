@@ -13,7 +13,6 @@ namespace Whumpus
         public float Weight = 1f;
         public float AdditionalDamping = 0f;
         public float Mass = 1f;
-        public bool Simulated = true;
         public bool LimitVelocity = true;
         public bool LimitAngularVelocity = true;
         public float MaxVelocity = 20000f;
@@ -26,6 +25,8 @@ namespace Whumpus
         [SerializeField] private List<ConstantForce> forces = new List<ConstantForce>();
         [SerializeField] private GameObject root;
         public Rigidbody mainRb;
+
+        public bool Simulated { get; } = true;
 
         public GameObject Root
         {
